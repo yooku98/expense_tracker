@@ -14,7 +14,7 @@ def initialize_file():
 
 def add_expense():
     category = input("Enter category (food, transport, etc): ").title()
-    amount = float(input("Enter amount: "))
+    amount = float(input("Enter amount: GHS "))
     date = datetime.now().strftime("%Y-%m-%d")
 
     with open(FILE, "a", newline="") as f:
