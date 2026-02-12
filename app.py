@@ -23,8 +23,18 @@ def read_expenses():
 
 def add_expense(category, amount):
     """Add a new expense to CSV"""
+    file_exists = os.path.isfile(EXPENSES_FILE)
+    
+    # Check if file exists AND has content
+    write_header = not file_exists or os.path.getsize(EXPENSES_FILE) == 0
+
     with open(EXPENSES_FILE, 'a', newline='') as f:
         writer = csv.writer(f)
+
+        # Write header row once at the beginning
+        if write_header:
+            writer.writerow(["date", "category", "amount"])
+
         writer.writerow([datetime.now().strftime('%Y-%m-%d %H:%M'), category, amount])
 
 def get_summary():
