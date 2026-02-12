@@ -52,11 +52,13 @@ def get_summary():
 @app.route('/')
 def index():
     """Home page showing all expenses"""
-    with open('expenses.csv', 'r') as file:
-        reader = csv.DictReader(file)
-        expenses = list(reader)
-
-    summary = get_summary(expenses)
+    try:
+        with open('expenses.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            expenses = list(reader)
+    except FileNotFoundError:
+        expenses = []
+    summary = get_summary()
     total = sum(summary.values()) if summary else 0
     return render_template('index.html', expenses=expenses, summary=summary, total=total)
 
