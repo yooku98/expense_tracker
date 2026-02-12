@@ -32,8 +32,8 @@ def get_summary():
     expenses = read_expenses()
     summary = {}
     for expense in expenses:
-        category = expense['Category']
-        amount = float(expense['Amount'])
+        category = expense['category']
+        amount = float(expense['amount'])
         summary[category] = summary.get(category, 0) + amount
     return summary
 
