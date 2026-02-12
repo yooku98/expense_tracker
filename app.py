@@ -42,16 +42,21 @@ def get_summary():
     expenses = read_expenses()
     summary = {}
     for expense in expenses:
-        category = expense['category']
-        amount = float(expense['amount'])
-        summary[category] = summary.get(category, 0) + amount
+        category = expense.get('category', 'Unknown')
+        amount = float(expense.get('amount', 0) or 0)
+        if category not in summary:
+            summary[category] = 0
+        summary[category] += amount
     return summary
 
 @app.route('/')
 def index():
     """Home page showing all expenses"""
-    expenses = read_expenses()
-    summary = get_summary()
+    with open('expenses.csv', 'r') as file:
+        reader = csv.DictReader(file)
+        expenses = list(reader)
+
+    summary = get_summary(expenses)
     total = sum(summary.values()) if summary else 0
     return render_template('index.html', expenses=expenses, summary=summary, total=total)
 
