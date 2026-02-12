@@ -1,86 +1,80 @@
-# app.py - Flask Web App Version
 from flask import Flask, render_template, request, redirect, jsonify
-import csv
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
 app = Flask(__name__)
 
-EXPENSES_FILE = 'expenses.csv'
+# ===============================
+# POSTGRES DATABASE CONFIG
+# ===============================
+DATABASE_URL = "postgresql://auto:uZuWns9xyNjXIhSpvpPj8N68T7kWwd79@dpg-d66u910gjchc738hn1p0-a/expense_tracker_yc0e"
 
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-def read_expenses():
-    """Read all expenses from CSV"""
-    expenses = []
-    try:
-        with open(EXPENSES_FILE, 'r') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                expenses.append(row)
-    except FileNotFoundError:
-        pass
-    return expenses
+db = SQLAlchemy(app)
 
-def add_expense(category, amount):
-    """Add a new expense to CSV"""
-    file_exists = os.path.isfile(EXPENSES_FILE)
-    
-    # Check if file exists AND has content
-    write_header = not file_exists or os.path.getsize(EXPENSES_FILE) == 0
+# ===============================
+# DATABASE MODEL
+# ===============================
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    category = db.Column(db.String(50), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
 
-    with open(EXPENSES_FILE, 'a', newline='') as f:
-        writer = csv.writer(f)
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "date": self.date.strftime("%Y-%m-%d %H:%M"),
+            "category": self.category,
+            "amount": self.amount,
+        }
 
-        # Write header row once at the beginning
-        if write_header:
-            writer.writerow(["date", "category", "amount"])
+# Create the database tables if they don't exist
+with app.app_context():
+    db.create_all()
 
-        writer.writerow([datetime.now().strftime('%Y-%m-%d %H:%M'), category, amount])
+# ===============================
+# ROUTES
+# ===============================
 
-def get_summary():
-    """Calculate spending by category"""
-    expenses = read_expenses()
-    summary = {}
-    for expense in expenses:
-        category = expense.get('category', 'Unknown')
-        amount = float(expense.get('amount', 0) or 0)
-        if category not in summary:
-            summary[category] = 0
-        summary[category] += amount
-    return summary
-
-@app.route('/')
+@app.route("/")
 def index():
-    """Home page showing all expenses"""
-    try:
-        with open('expenses.csv', 'r') as file:
-            reader = csv.DictReader(file)
-            expenses = list(reader)
-    except FileNotFoundError:
-        expenses = []
-    summary = get_summary()
-    total = sum(summary.values()) if summary else 0
-    return render_template('index.html', expenses=expenses, summary=summary, total=total)
+    expenses = Expense.query.order_by(Expense.date.desc()).all()
 
-@app.route('/add', methods=['POST'])
+    summary = {}
+    for e in expenses:
+        summary[e.category] = summary.get(e.category, 0) + e.amount
+
+    total = sum(summary.values()) if summary else 0
+
+    return render_template("index.html", expenses=expenses, summary=summary, total=total)
+
+
+@app.route("/add", methods=["POST"])
 def add():
-    """Add new expense"""
-    category = request.form.get('category')
-    amount = request.form.get('amount')
-    
+    category = request.form.get("category")
+    amount = request.form.get("amount")
+
     if category and amount:
         try:
             amount = float(amount)
-            add_expense(category, amount)
-        except ValueError:
-            pass
-    
-    return redirect('/')
+            new_expense = Expense(category=category, amount=amount)
+            db.session.add(new_expense)
+            db.session.commit()
+        except Exception as e:
+            print("Error adding expense:", e)
 
-@app.route('/api/expenses')
+    return redirect("/")
+
+
+@app.route("/api/expenses")
 def api_expenses():
-    """API endpoint for expenses (optional - for charts)"""
-    return jsonify(read_expenses())
+    expenses = Expense.query.all()
+    return jsonify([e.to_dict() for e in expenses])
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=5000)
