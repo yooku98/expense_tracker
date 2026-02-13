@@ -1,17 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="theme-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker Dashboard</title>
 
     <style>
+        :root, [data-theme="dark"] {
+            --bg: #0f0f10;
+            --card: #1a1b1e;
+            --text: #e5e5e5;
+            --text-heading: #f8f8f8;
+            --text-sub: #f0f0f0;
+            --th-bg: #242529;
+            --border: #333;
+            --accent: #4ddfad;
+            --shadow: rgba(0,0,0,0.3);
+        }
+        [data-theme="light"] {
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #1a1a1a;
+            --text-heading: #0d0d0d;
+            --text-sub: #262626;
+            --th-bg: #e8e8e8;
+            --border: #ddd;
+            --accent: #0d9488;
+            --shadow: rgba(0,0,0,0.08);
+        }
+
         body {
             font-family: "Inter", sans-serif;
-            background: #0f0f10;
+            background: var(--bg);
             margin: 0;
             padding: 0;
-            color: #e5e5e5;
+            color: var(--text);
         }
 
         .container {
@@ -20,27 +43,70 @@
             padding: 20px;
         }
 
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
         h1 {
-            text-align: center;
+            margin: 0;
             font-size: 2rem;
             font-weight: 700;
-            margin-bottom: 25px;
-            color: #f8f8f8;
+            color: var(--text-heading);
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-sub);
+        }
+        .theme-toggle label {
+            cursor: pointer;
+            user-select: none;
+        }
+        .theme-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            background: var(--th-bg);
+            border-radius: 26px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        .theme-switch::after {
+            content: "";
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+        [data-theme="light"] .theme-switch::after {
+            transform: translateX(22px);
         }
 
         .card {
-            background: #1a1b1e;
+            background: var(--card);
             padding: 18px 20px;
             margin-bottom: 25px;
             border-radius: 14px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 20px var(--shadow);
         }
 
         h2 {
             font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 12px;
-            color: #f0f0f0;
+            color: var(--text-sub);
         }
 
         table {
@@ -52,30 +118,27 @@
             text-align: left;
             padding: 12px 10px;
             font-weight: 600;
-            background: #242529;
+            background: var(--th-bg);
         }
 
         td {
             padding: 10px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--border);
         }
 
         .amount {
             font-weight: 600;
-            color: #4ddfad; /* teal green highlights */
+            color: var(--accent);
         }
 
-        /* Card titles spacing */
         .card h2 {
             margin-top: 0;
         }
 
-        /* Table wrapper for mobile responsiveness */
         .table-wrapper {
             overflow-x: auto;
         }
 
-        /* Mobile adjustments */
         @media (max-width: 600px) {
             h1 { font-size: 1.6rem; }
             h2 { font-size: 1.1rem; }
@@ -88,7 +151,13 @@
 <body>
 <div class="container">
 
-    <h1>Expense Tracker Dashboard</h1>
+    <header class="header">
+        <h1>Expense Tracker Dashboard</h1>
+        <div class="theme-toggle">
+            <span id="theme-label">Dark</span>
+            <button type="button" class="theme-switch" id="theme-switch" aria-label="Toggle dark/light mode" title="Toggle dark/light mode"></button>
+        </div>
+    </header>
 
     <!-- Summary by Category -->
     <div class="card">
@@ -133,5 +202,38 @@
     </div>
 
 </div>
+
+    <script>
+        (function () {
+            var KEY = "expense-tracker-theme";
+            var root = document.getElementById("theme-root");
+            var btn = document.getElementById("theme-switch");
+            var label = document.getElementById("theme-label");
+
+            function getTheme() {
+                try {
+                    return localStorage.getItem(KEY) || "dark";
+                } catch (e) {
+                    return "dark";
+                }
+            }
+
+            function setTheme(theme) {
+                root.setAttribute("data-theme", theme);
+                if (label) label.textContent = theme === "light" ? "Light" : "Dark";
+                try {
+                    localStorage.setItem(KEY, theme);
+                } catch (e) {}
+            }
+
+            function toggleTheme() {
+                var next = getTheme() === "dark" ? "light" : "dark";
+                setTheme(next);
+            }
+
+            setTheme(getTheme());
+            if (btn) btn.addEventListener("click", toggleTheme);
+        })();
+    </script>
 </body>
 </html>
