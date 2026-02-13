@@ -8,7 +8,7 @@ app = Flask(__name__)
 # ===============================
 # POSTGRES DATABASE CONFIG
 # ===============================
-DATABASE_URL = "postgresql://auto:uZuWns9xyNjXIhSpvpPj8N68T7kWwd79@dpg-d66u910gjchc738hn1p0-a/expense_tracker_yc0e"
+DATABASE_URL = "postgresql+psycopg://auto:uZuWns9xyNjXIhSpvpPj8N68T7kWwd79@dpg-d66u910gjchc738hn1p0-a/expense_tracker_yc0e"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
