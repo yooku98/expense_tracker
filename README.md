@@ -21,7 +21,7 @@ Amounts are in Ghana cedis (GHS).
 | `SECRET_KEY` | yes in production | Flask session/CSRF key |
 | `API_TOKEN` | no | Protects `/api/expenses` |
 
-**Known gap:** the dashboard template has no add/delete forms yet, so new expenses can't be entered from the web UI. `CSRFProtect` is on, so any form added later must include `{{ csrf_token() }}`. Calling the POST routes without a token returns 400. For now, enter data with the CLI.
+**Known gap:** the dashboard template has no add/delete forms yet, so new expenses can't be entered from the web UI. `CSRFProtect` is on, so any form added later must include `{{ csrf_token() }}`. Calling the POST routes without a token returns 400. The CLI stores data in its own CSV and does not share the web app's database.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
