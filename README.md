@@ -2,7 +2,7 @@
 
 A personal expense tracker with two front ends that share the same idea: log spending by category, then see where the money goes.
 
-1. **Web app** (`app.py`) — Flask + PostgreSQL dashboard: add and delete expenses, spending-by-category totals, plus a JSON API.
+1. **Web app** (`app.py`) — Flask + PostgreSQL dashboard showing spending by category and all expenses, plus a JSON API.
 2. **CLI** (`tracker.py`) — terminal menu that stores expenses in a local `expenses.csv`. It can be packaged as a standalone Windows `.exe` with PyInstaller.
 
 Amounts are in Ghana cedis (GHS).
@@ -11,10 +11,8 @@ Amounts are in Ghana cedis (GHS).
 
 ## Web app
 
-- Add an expense (category + amount) with validation and flash messages
-- Delete an expense
-- Spending-by-category summary and grand total
-- CSRF protection on forms (Flask-WTF)
+- Dashboard (`/`): spending-by-category summary, grand total, and a table of all expenses, with a dark/light toggle
+- `POST /add` (category + amount, validated) and `POST /delete/<id>` routes
 - `GET /api/expenses` returns all expenses as JSON. If `API_TOKEN` is set, it also requires `?token=` or `Authorization: Bearer <token>`
 
 | Variable | Required | Purpose |
@@ -22,6 +20,8 @@ Amounts are in Ghana cedis (GHS).
 | `DATABASE_URL` | yes | PostgreSQL connection string (the app refuses to start without it) |
 | `SECRET_KEY` | yes in production | Flask session/CSRF key |
 | `API_TOKEN` | no | Protects `/api/expenses` |
+
+**Known gap:** the dashboard template has no add/delete forms yet, so new expenses can't be entered from the web UI. `CSRFProtect` is on, so any form added later must include `{{ csrf_token() }}`. Calling the POST routes without a token returns 400. For now, enter data with the CLI.
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
