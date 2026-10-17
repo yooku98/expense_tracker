@@ -57,3 +57,5 @@ tracker.py          CLI version (CSV storage)
 tracker.spec        PyInstaller build spec for the CLI
 requirements.txt    Web app dependencies
 ```
+
+`build/` and `dist/` (PyInstaller output) are gitignored. Build the executable locally, or attach it to a GitHub Release, instead of committing it.
